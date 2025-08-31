@@ -1,0 +1,67 @@
+{
+    "lifts": [
+      {
+        "id": 1,
+        "title": "Lift 1",
+        "description": "Near Entrance",
+        "start_floor": 1,
+        "end_floor": 4,
+        "direction": "up",
+        "occupancy": "full",
+        "under_maintenance":false,
+        "emergency": false
+      },
+      {
+        "id": 2,
+        "title": "Lift 2",
+        "description": "Beside Auditorium",
+        "start_floor": 4,
+        "end_floor": 7,
+        "direction": "down",
+        "occupancy": "empty",
+        "under_maintenance": false,
+        "emergency": false
+      },{
+        "id": 3,
+        "title": "Lift 3",
+        "description": "Infront of faculty cabin",
+        "start_floor": 1,
+        "end_floor": 7,
+        "direction": "up",
+        "occupancy": "half empty",
+        "under_maintenance": false,
+        "emergency": true
+      },{
+        "id": 4,
+        "title": "Lift 4",
+        "description": "Near Cafeteria",
+        "start_floor": 1,
+        "end_floor": 4,
+        "direction": "down",
+        "occupancy": "empty",
+        "under_maintenance": true,
+        "emergency": false
+      },{
+        "id": 5,
+        "title": "Lift 5",
+        "description": "Near Entrance",
+        "start_floor": 1,
+        "end_floor": 7,
+        "direction": "up",
+        "occupancy": "full",
+        "under_maintenance": true,
+        "emergency": false
+      },{
+        "id": 6,
+        "title": "Lift 6",
+        "description": "Near Back Entrance",
+        "start_floor": 1,
+        "end_floor": 7,
+        "direction": "down",
+        "occupancy": "full",
+        "under_maintenance": false,
+        "emergency": true
+      }
+    ]
+  }
+  
