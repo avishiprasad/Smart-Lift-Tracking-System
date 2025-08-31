@@ -15,9 +15,11 @@ function Navbar({ className }: { className?: string }) {
         </Link>
         <MenuItem setActive={setActive} active={active} item="SignIn">
           <div className="flex flex-col space-y-4 text-sm">
-            <HoveredLink href="/admin-signin">Admin</HoveredLink>
-            <HoveredLink href="/liftuser-signin">Lift User</HoveredLink>
-            <HoveredLink href="/maintenancestaff-signin">Maintenance Staff</HoveredLink>
+  
+            <HoveredLink href="/auth/admin">Admin</HoveredLink>
+            <HoveredLink href="/auth/user">Lift User</HoveredLink>
+            <HoveredLink href="/auth/maintenancestaff">Maintenance Staff</HoveredLink>
+
           </div>
         </MenuItem>
         <Link href="/contactus">
