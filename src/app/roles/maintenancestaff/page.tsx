@@ -1,58 +1,14 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StickyScroll } from "@/components/ui/sticky-scroll-reveal";
 
-interface LiftLog {
-  id: number;
+interface Lift {
+  _id: string;
   title: string;
   description: string;
-  maintenanceDate?: string; // optional future maintenance date
+  maintenance_logs?: string;
+  maintenance_date?: string;
 }
-
-const initialLogs: LiftLog[] = [
-  {
-    id: 1,
-    title: "Lift 1 - Maintenance Log",
-    description:
-      "Checked motor functionality and replaced worn-out cables. Lift operating normally. No emergency events reported.",
-  },
-  {
-    id: 2,
-    title: "Lift 2 - Maintenance Log",
-    description:
-      "Routine inspection completed. Emergency alarm system tested successfully. No issues found with the doors or sensors.",
-  },
-  {
-    id: 3,
-    title: "Lift 3 - Maintenance Log",
-    description:
-      "Emergency stop button was triggered during testing; corrected minor wiring issue. Lift is safe for operation now.",
-  },
-  {
-    id: 4,
-    title: "Lift 4 - Maintenance Log",
-    description:
-      "Hydraulic system inspected. Lubrication applied to all moving parts. Under maintenance flag cleared after successful tests.",
-  },
-  {
-    id: 5,
-    title: "Lift 5 - Maintenance Log",
-    description:
-      "Minor door alignment issue fixed. Operational tests completed with full load. Emergency system functioning properly.",
-  },
-  {
-    id: 6,
-    title: "Lift 6 - Maintenance Log",
-    description:
-      "Control panel firmware updated. Occupancy sensor recalibrated. No emergency events reported since last inspection.",
-  },
-  {
-    id: 7,
-    title: "Lift 7 - Maintenance Log",
-    description:
-      "Emergency stop button tested successfully. Bearings lubricated, and floor level calibration verified. Ready for normal operation.",
-  },
-];
 
 // Match colors with StickyScroll gradients (optional, can customize)
 const panelColors = [
@@ -62,87 +18,152 @@ const panelColors = [
 ];
 
 export default function LiftMaintenanceLogs() {
-  const [logs, setLogs] = useState<LiftLog[]>(initialLogs);
-  const [selectedLog, setSelectedLog] = useState<LiftLog | null>(logs[0]);
-  const [activeCard, setActiveCard] = useState(0); // active card index
+  const [lifts, setLifts] = useState<Lift[]>([]);
+  const [selectedLift, setSelectedLift] = useState<Lift | null>(null);
+  const [activeCard, setActiveCard] = useState(0);
 
-  const handleEditLog = (newDescription: string) => {
-    if (!selectedLog) return;
-    const updated = logs.map((log) =>
-      log.id === selectedLog.id ? { ...log, description: newDescription } : log
+  // Fetch lifts from MongoDB
+  useEffect(() => {
+    const fetchLifts = async () => {
+      const res = await fetch("/api/lift");
+      const data = await res.json();
+      setLifts(data);
+      setSelectedLift(data[0]);
+    };
+    fetchLifts();
+  }, []);
+
+  const handleEditLog = async (newDescription: string) => {
+    if (!selectedLift) return;
+    setSelectedLift({ ...selectedLift, maintenance_logs: newDescription });
+    setLifts((prev) =>
+      prev.map((l) =>
+        l._id === selectedLift._id
+          ? { ...l, maintenance_logs: newDescription }
+          : l
+      )
     );
-    setLogs(updated);
-    setSelectedLog({ ...selectedLog, description: newDescription });
+
+    await fetch("/api/lift", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: selectedLift._id,
+        updates: { maintenance_logs: newDescription },
+      }),
+    });
   };
 
-  const handleSchedule = (date: string) => {
-    if (!selectedLog) return;
-    const updated = logs.map((log) =>
-      log.id === selectedLog.id ? { ...log, maintenanceDate: date } : log
+  const handleSchedule = async (date: string) => {
+    if (!selectedLift) return;
+    setSelectedLift({ ...selectedLift, maintenance_date: date });
+    setLifts((prev) =>
+      prev.map((l) =>
+        l._id === selectedLift._id ? { ...l, maintenance_date: date } : l
+      )
     );
-    setLogs(updated);
-    setSelectedLog({ ...selectedLog, maintenanceDate: date });
+
+    await fetch("/api/lift", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: selectedLift._id,
+        updates: { maintenance_date: date },
+      }),
+    });
   };
 
-  const stickyContent = logs.map((log) => ({
-    title: log.title,
-    description: log.description,
+  // ✅ FIXED: use lifts, not logs
+  const stickyContent = lifts.map((lift) => ({
+    title: lift.title,
+    description: lift.description,
+    // content: (
+    //   <div>
+    //     <h3 className="text-xl font-bold mb-2">{lift.title}</h3>
+    //     <p>{lift.maintenance_logs || lift.description}</p>
+    //     {lift.maintenance_date && (
+    //       <p className="text-sm text-gray-400 mt-2">
+    //         Scheduled on: {lift.maintenance_date}
+    //       </p>
+    //     )}
+    //   </div>
+    // ),
+    content: (
+      <div className="flex flex-col items-center justify-center text-center h-full">
+        <h3 className="text-2xl font-bold mb-2">{lift.title}</h3>
+        <p className="text-lg text-gray-100 max-w-md">{lift.description}</p>
+        {lift.maintenance_date && (
+          <p className="text-sm text-gray-300 mt-4 italic">
+            Scheduled on: {lift.maintenance_date}
+          </p>
+        )}
+      </div>
+    ),    
   }));
 
   return (
     <div className="flex min-h-screen bg-gray-900">
-      {/* Left Panel: Edit & Schedule */}
+      {/* Left Panel */}
       <div
         className={`w-1/3 p-6 flex flex-col space-y-4 text-white border-r border-gray-700 transition-colors duration-500 ${
           panelColors[activeCard % panelColors.length]
         }`}
       >
-        <h2 className="text-3xl font-bold">Edit Lift Log</h2>
+        <h2 className="text-3xl font-bold">Maintenance Panel</h2>
 
-        <label className="text-2xl font-semibold">Select Lift:</label>
+        <label className="text-xl font-semibold">Select Lift:</label>
         <select
           className="p-2 rounded text-black"
-          value={selectedLog?.id}
+          value={selectedLift?._id || ""}
           onChange={(e) =>
-            setSelectedLog(
-              logs.find((log) => log.id === Number(e.target.value)) || null
-            )
+            setSelectedLift(lifts.find((l) => l._id === e.target.value) || null)
           }
         >
-          {logs.map((log) => (
-            <option key={log.id} value={log.id}>
-              {log.title}
+          {lifts.map((lift) => (
+            <option key={lift._id} value={lift._id}>
+              {lift.title}
             </option>
           ))}
         </select>
 
-        <label className="text-2xl font-semibold">Edit Description:</label>
+        <label className="text-xl font-semibold">Edit Log Description:</label>
         <textarea
           className="p-2 rounded text-black h-40"
-          value={selectedLog?.description || ""}
+          value={selectedLift?.maintenance_logs || ""}
           onChange={(e) => handleEditLog(e.target.value)}
         />
 
-        <label className="text-2xl font-semibold">Schedule Maintenance:</label>
+        <label className="text-xl font-semibold">Schedule Maintenance:</label>
         <input
           type="date"
           className="p-2 rounded text-black"
-          value={selectedLog?.maintenanceDate || ""}
+          value={selectedLift?.maintenance_date || ""}
           onChange={(e) => handleSchedule(e.target.value)}
         />
 
-        {selectedLog?.maintenanceDate && (
-          <p>Scheduled Date: {selectedLog.maintenanceDate}</p>
+        {selectedLift?.maintenance_date && (
+          <p className="mt-2 text-sm">
+            Scheduled for:{" "}
+            <span className="font-semibold">
+              {selectedLift.maintenance_date}
+            </span>
+          </p>
         )}
       </div>
 
-      {/* Right Panel: StickyScroll */}
+      {/* Right Panel - Sticky Scroll */}
       <div className="w-2/3 flex justify-center items-center p-6">
         <div className="w-full max-w-7xl">
-          <StickyScroll
-            content={stickyContent}
-            onActiveCardChange={(index) => setActiveCard(index)}
-          />
+          {stickyContent.length > 0 ? (
+            <StickyScroll
+              content={stickyContent}
+              onActiveCardChange={(index) => setActiveCard(index)}
+            />
+          ) : (
+            <p className="text-white text-center">
+              Loading lift maintenance logs...
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -10,6 +10,8 @@ const LiftSchema = new Schema({
   occupancy: { type: String, enum: ["empty", "half empty", "full"], default: "empty" },
   under_maintenance: { type: Boolean, default: false },
   emergency: { type: Boolean, default: false },
+  maintenance_logs: { type: String, default: "" }, // ✅ log description
+  maintenance_date: { type: String, default: "" }, // ✅ scheduled date
 }, { timestamps: true });
 
 export const Lift = models.Lift || model("Lift", LiftSchema);
