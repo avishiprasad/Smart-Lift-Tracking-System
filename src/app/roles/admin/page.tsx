@@ -152,7 +152,7 @@ export default function AdminLiftPage() {
                   onChange={(e) =>
                     handleChange(lift._id, "emergency", e.target.checked)
                   }
-                  className="ml-2"
+                  className={`ml-2 accent-red-600`}
                 />
               </div>
               <div>
@@ -163,7 +163,7 @@ export default function AdminLiftPage() {
                   onChange={(e) =>
                     handleChange(lift._id, "under_maintenance", e.target.checked)
                   }
-                  className="ml-2"
+                  className={`ml-2 accent-yellow-400`}
                 />
               </div>
             </div>

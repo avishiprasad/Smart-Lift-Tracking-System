@@ -11,6 +11,7 @@ interface Lift {
   description: string;
   start_floor: number;
   end_floor: number;
+  current_floor: number;
   direction: string;
   occupancy: string;
   under_maintenance: boolean;
@@ -18,7 +19,6 @@ interface Lift {
 }
 
 const Page = () => {
-  //const lifts = liftData.lifts; // Access lifts array from JSON
   const [lifts, setLifts] = useState([]);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ const Page = () => {
           WELCOME USER
         </h2>
         <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-white sm:text-4xl">
-          List of Lifts in the Building
+          Lifts in the Building
         </p>
       </div>
 
@@ -49,48 +49,58 @@ const Page = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
           {lifts.map((lift: Lift) => (
             <div key={lift.id} className="flex justify-center">
-              <BackgroundGradient className="flex flex-col rounded-[22px] bg-white dark:bg-zinc-900 overflow-hidden h-[250px] w-[300px]">
-                <div className="p-4 sm:p-6 flex flex-col items-center text-center flex-grow">
-                  <div className="flex flex-col items-center justify-center bg-gray-800 text-white text-2xl font-bold rounded-lg w-16 h-16 mb-3">
-                    {lift.current_floor}
+              <BackgroundGradient
+              className={`flex flex-col rounded-[22px] bg-white dark:bg-zinc-900 overflow-hidden h-[280px] w-[300px] ${
+                lift.emergency ? "border-2 border-red-600" : ""
+              } ${lift.under_maintenance ? "border-2 border-yellow-500" : ""}`}
+            >
+              <div className="p-4 sm:p-6 flex flex-col items-center text-center flex-grow">
+                {/* Floor + Direction Box */}
+                <div
+                  className={`flex flex-col items-center justify-center text-2xl font-bold rounded-lg w-16 h-16 mb-3 ${
+                    lift.emergency
+                      ? "bg-red-700 text-white"
+                      : lift.under_maintenance
+                      ? "bg-yellow-500 text-black"
+                      : "bg-gray-800 text-white"
+                  }`}
+                >
+                  {lift.current_floor}
+                  {!lift.emergency && !lift.under_maintenance && (
                     <span className="text-teal-400 text-sm">
                       {lift.direction === "up" ? "↑" : "↓"}
                     </span>
-                  </div>
-
-                  <p className="text-2xl sm:text-3xl text-black mt-4 mb-2 dark:text-neutral-200">
-                    {lift.title}
-                  </p>
-                  <p className="text-1xl text-neutral-600 dark:text-neutral-400 flex-grow">
-                    {lift.description}
-                  </p>
-                  <p className="text-sm mt-2">
-                    <span className="text-white font-medium">Floors: </span>
-                    <span className="text-neutral-400">
-                      {lift.start_floor} - {lift.end_floor}
-                    </span>
-                  </p>
-                  <p className="text-sm">
-                    <span className="text-white font-medium">Direction: </span>
-                    <span className="text-neutral-400">{lift.direction}</span>
-                  </p>
-                  <p className="text-sm">
-                    <span className="text-white font-medium">Occupancy: </span>
-                    <span className="text-neutral-400">{lift.occupancy}</span>
-                  </p>
-
-                  {lift.under_maintenance && (
-                    <p className="text-yellow-500 font-bold mt-2">
-                      Under Maintenance
-                    </p>
-                  )}
-                  {lift.emergency && (
-                    <p className="text-red-500 font-bold mt-2">
-                      Emergency Alert!
-                    </p>
                   )}
                 </div>
-              </BackgroundGradient>
+
+                <p className="text-2xl sm:text-3xl text-white mt-2 mb-2 font-semibold">
+                  {lift.title}
+                </p>
+                <p className="text-sm text-gray-400 flex-grow">{lift.description}</p>
+
+                <p className="text-sm mt-2">
+                  <span className="text-white font-medium">Floors: </span>
+                  <span className="text-neutral-400">
+                    {lift.start_floor} - {lift.end_floor}
+                  </span>
+                </p>
+                <p className="text-sm text-neutral-400">
+                  Occupancy: {lift.occupancy}
+                </p>
+
+                {/* Status Messages */}
+                {lift.under_maintenance && (
+                  <p className="text-yellow-400 font-bold mt-3">
+                    ⚙️ Under Maintenance
+                  </p>
+                )}
+                {lift.emergency && (
+                  <p className="text-red-500 font-bold mt-3 animate-pulse">
+                    🚨 Emergency Alert!
+                  </p>
+                )}
+              </div>
+            </BackgroundGradient>
             </div>
           ))}
         </div>
